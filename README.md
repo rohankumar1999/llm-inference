@@ -1,70 +1,256 @@
-# Getting Started with Create React App
+# LLM Inference - Model Comparison Tool
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A full-stack application for comparing responses from different Large Language Models (LLMs) side by side. Built with React frontend and FastAPI backend that connects to cloud-hosted TGI (Text Generation Inference) instances.
 
-## Available Scripts
+## Features
 
-In the project directory, you can run:
+- 🚀 **Cloud-Native**: Designed for cloud GPU deployments with TGI
+- 🔄 **Side-by-Side Comparison**: Compare responses from two different models simultaneously
+- 🎨 **Modern UI**: Beautiful, responsive interface with real-time status indicators
+- ☁️ **Flexible Deployment**: Backend can run anywhere, TGI on GPU instances
+- 📊 **Multiple Models**: Support for GPT-2, TinyLlama, Mistral, Llama 2, Falcon, and more
+- 💚 **Health Monitoring**: Real-time TGI endpoint health checking
 
-### `npm start`
+## Architecture
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+```
+React Frontend → FastAPI Backend → Cloud GPU TGI Instances
+```
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+- **Frontend**: React with modern hooks and state management
+- **Backend**: FastAPI that proxies requests to TGI endpoints
+- **Inference**: HuggingFace Text Generation Inference on cloud GPUs
+- **Deployment**: TGI containers run on dedicated GPU instances
 
-### `npm test`
+## Prerequisites
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### For Frontend & Backend:
+- Node.js 14+ and npm
+- Python 3.8+
 
-### `npm run build`
+### For TGI (on GPU instances):
+- Docker with NVIDIA GPU support
+- NVIDIA GPU with 4GB+ VRAM
+- 16GB+ system RAM for larger models
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## Quick Start
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+### 1. Deploy TGI on Cloud GPU Instances
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+See [DEPLOYMENT.md](DEPLOYMENT.md) for detailed cloud deployment instructions.
 
-### `npm run eject`
+Quick example on a GPU instance:
+```bash
+# On your GPU server
+./backend/deploy_tgi.sh "gpt2" 8080
+./backend/deploy_tgi.sh "TinyLlama/TinyLlama-1.1B-Chat-v1.0" 8081
+```
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+### 2. Configure Backend
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+```bash
+cd backend
+cp .env.example .env
+# Edit .env with your TGI endpoint URLs
+nano .env
+```
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+Example `.env`:
+```bash
+TGI_GPT2_ENDPOINT=http://your-gpu-server.com:8080
+TGI_TINYLLAMA_ENDPOINT=http://your-gpu-server.com:8081
+```
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+### 3. Install Dependencies
 
-## Learn More
+**Frontend:**
+```bash
+npm install
+```
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+**Backend:**
+```bash
+cd backend
+pip install -r requirements.txt
+```
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+## Usage
 
-### Code Splitting
+### 1. Start TGI Instances (on GPU servers)
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+```bash
+# Already running from deployment step
+# Verify they're healthy:
+curl http://your-gpu-server:8080/health
+```
 
-### Analyzing the Bundle Size
+### 2. Start the Backend Server
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+```bash
+cd backend
+python main.py
+```
 
-### Making a Progressive Web App
+The API will be available at `http://localhost:8000`
+API documentation at `http://localhost:8000/docs`
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+On startup, you'll see health status of all configured TGI endpoints:
+```
+Starting LLM Inference API...
+Configured models: ['gpt-2', 'tiny-llama', ...]
+  gpt-2: http://gpu-server:8080
+    ✓ Available
+  tiny-llama: http://gpu-server:8081
+    ✓ Available
+```
 
-### Advanced Configuration
+### 3. Start the Frontend
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+In a new terminal:
 
-### Deployment
+```bash
+npm start
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+The React app will open at `http://localhost:3000`
 
-### `npm run build` fails to minify
+### 4. Use the Application
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+1. Select two different models from the dropdown menus (✓ = available, ✗ = unavailable)
+2. Type your prompt in the input box
+3. Press Enter or click "Send"
+4. Both models will generate responses simultaneously
+5. Compare the responses side by side!
+
+## Available Models
+
+- **GPT-2**: Small, fast model good for testing (~500MB)
+- **TinyLlama 1.1B**: Lightweight but capable (~2GB)
+- **Mistral 7B**: High-quality 7B parameter model (~14GB)
+- **Llama 2 7B Chat**: Meta's chat model (requires HF access)
+- **Falcon 7B Instruct**: Strong open-source model (~14GB)
+- **Microsoft Phi-2**: Efficient 2.7B parameter model (~5GB)
+
+## Configuration
+
+### Backend Configuration
+
+1. **Environment Variables** (`.env`):
+   ```bash
+   # TGI Endpoints
+   TGI_GPT2_ENDPOINT=http://gpu1.example.com:8080
+   TGI_TINYLLAMA_ENDPOINT=http://gpu2.example.com:8080
+   
+   # Server
+   HOST=0.0.0.0
+   PORT=8000
+   
+   # CORS
+   ALLOWED_ORIGINS=http://localhost:3000,https://yourdomain.com
+   ```
+
+2. **Add New Models**:
+   
+   Edit `backend/main.py` MODELS dict:
+   ```python
+   MODELS = {
+       "my-model": {
+           "name": "My Model",
+           "hf_name": "org/model-name",
+           "endpoint": os.getenv("TGI_MYMODEL_ENDPOINT"),
+       }
+   }
+   ```
+
+### Frontend Configuration
+
+Edit `src/App.js`:
+```javascript
+const API_URL = 'http://localhost:8000';  // Change for production
+```
+
+## API Endpoints
+
+- `GET /` - API information and status
+- `GET /models` - List all available models with health status
+- `GET /models/{model_id}/health` - Check health of specific model endpoint
+- `POST /generate` - Generate text from a model
+
+See [API_REFERENCE.md](API_REFERENCE.md) for complete documentation.
+
+## Troubleshooting
+
+### Backend Can't Connect to TGI
+
+```bash
+# Check if TGI is running
+curl http://your-tgi-endpoint:8080/health
+
+# Check backend logs
+cd backend && python main.py
+# Look for "✓ Available" or "✗ Unavailable" messages
+```
+
+### Models Show as Unavailable (✗)
+
+This means the TGI endpoint is not reachable:
+1. Verify TGI container is running: `docker ps`
+2. Check firewall/security groups allow the port
+3. Verify the endpoint URL in `.env` is correct
+4. Test directly: `curl http://endpoint:8080/health`
+
+### Frontend Shows "Backend Disconnected"
+
+```bash
+# Make sure backend is running
+cd backend
+python main.py
+
+# Check CORS settings in backend/main.py
+# Ensure your frontend URL is in allowed_origins
+```
+
+### Generation Timeout
+
+- TGI might be overloaded
+- Model is too large for GPU memory
+- Network issue between backend and TGI
+- Increase timeout in `backend/main.py`
+
+For more help, see [DEPLOYMENT.md](DEPLOYMENT.md) for cloud-specific troubleshooting.
+
+## Development
+
+### Adding New Models
+
+1. Add to `backend/main.py` MODELS dict:
+```python
+MODELS = {
+    "my-model": "organization/model-name-on-huggingface",
+}
+```
+
+2. The frontend will automatically fetch and display new models
+
+### Custom Generation Parameters
+
+Modify the generation request in `src/App.js`:
+```javascript
+{
+  model_id: modelId,
+  prompt: userMessage,
+  max_new_tokens: 200,    // Adjust these
+  temperature: 0.7,
+  top_p: 0.95,
+}
+```
+
+## License
+
+MIT
+
+## Credits
+
+- [HuggingFace TGI](https://github.com/huggingface/text-generation-inference)
+- [FastAPI](https://fastapi.tiangolo.com/)
+- [React](https://reactjs.org/)
