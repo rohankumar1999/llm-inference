@@ -29,35 +29,25 @@ app.add_middleware(
 # Model configurations with their TGI endpoint URLs
 # These should be set via environment variables or config file
 MODELS = {
-    "gpt-2": {
-        "name": "GPT-2",
-        "hf_name": "gpt2",
-        "endpoint": os.getenv("TGI_GPT2_ENDPOINT", "http://localhost:8080"),
+    "llama-3.2-3b-base": {
+        "name": "Llama 3.2 3B (Base)",
+        "hf_name": "meta-llama/Llama-3.2-3B-Instruct",
+        "endpoint": os.getenv("TGI_LLAMA32_BASE_ENDPOINT", "http://localhost:8080"),
     },
-    "llama-2-7b": {
-        "name": "Llama 2 7B Chat",
-        "hf_name": "meta-llama/Llama-2-7b-chat-hf",
-        "endpoint": os.getenv("TGI_LLAMA2_ENDPOINT", "http://localhost:8081"),
+    "llama-3.2-3b-sft": {
+        "name": "Llama 3.2 3B (SFT Prover)",
+        "hf_name": "rkumar1999/Llama3.2-3B-Prover-openr1-distill-SFT",
+        "endpoint": os.getenv("TGI_LLAMA32_SFT_ENDPOINT", "http://localhost:8081"),
     },
-    "mistral-7b": {
-        "name": "Mistral 7B Instruct",
-        "hf_name": "mistralai/Mistral-7B-Instruct-v0.1",
-        "endpoint": os.getenv("TGI_MISTRAL_ENDPOINT", "http://localhost:8082"),
+    "llama-3.2-3b-grpo": {
+        "name": "Llama 3.2 3B (GRPO Prover)",
+        "hf_name": "rkumar1999/Llama3.2-3B-Prover-openr1-distill-GRPO",
+        "endpoint": os.getenv("TGI_LLAMA32_GRPO_ENDPOINT", "http://localhost:8082"),
     },
-    "falcon-7b": {
-        "name": "Falcon 7B Instruct",
-        "hf_name": "tiiuae/falcon-7b-instruct",
-        "endpoint": os.getenv("TGI_FALCON_ENDPOINT", "http://localhost:8083"),
-    },
-    "phi-2": {
-        "name": "Microsoft Phi-2",
-        "hf_name": "microsoft/phi-2",
-        "endpoint": os.getenv("TGI_PHI2_ENDPOINT", "http://localhost:8084"),
-    },
-    "tiny-llama": {
-        "name": "TinyLlama 1.1B Chat",
-        "hf_name": "TinyLlama/TinyLlama-1.1B-Chat-v1.0",
-        "endpoint": os.getenv("TGI_TINYLLAMA_ENDPOINT", "http://localhost:8085"),
+    "llama-3.2-3b-obt": {
+        "name": "Llama 3.2 3B (OBT)",
+        "hf_name": "rkumar1999/llama3.2-3b-obt",
+        "endpoint": os.getenv("TGI_LLAMA32_OBT_ENDPOINT", "http://localhost:8083"),
     },
 }
 
