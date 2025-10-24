@@ -13,10 +13,16 @@
 
 # misc
 .DS_Store
+
+# environment files (local overrides)
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
+
+# Note: .env.production can be committed if backend URL is not sensitive
+# Uncomment to ignore it:
+# .env.production
 
 npm-debug.log*
 yarn-debug.log*
@@ -26,6 +32,7 @@ yarn-error.log*
 backend/__pycache__/
 backend/*.pyc
 backend/.env
+backend/.env.local
 backend/venv/
 backend/.venv/
 backend/*.egg-info/

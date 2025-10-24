@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
 
-// Backend API URL
-const API_URL = 'http://localhost:8000';
+// Backend API URL - Change this to your cloud backend IP/URL
+const API_URL = 'http://localhost:8000';  // TODO: Replace with your backend URL
 
 // Available models (will be fetched from backend)
 const DEFAULT_MODELS = [
