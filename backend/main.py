@@ -58,10 +58,7 @@ model_health_cache: Dict[str, bool] = {}
 class GenerateRequest(BaseModel):
     model_id: str
     prompt: str
-    max_new_tokens: int = Field(default=200, ge=1, le=2048)
-    temperature: float = Field(default=0.7, ge=0.0, le=2.0)
-    top_p: float = Field(default=0.95, ge=0.0, le=1.0)
-    repetition_penalty: float = Field(default=1.0, ge=1.0, le=2.0)
+    max_new_tokens: int = Field(default=1024, ge=1, le=2048)
 
 
 class GenerateResponse(BaseModel):
@@ -94,10 +91,7 @@ async def check_model_health(model_id: str, endpoint: str) -> bool:
 async def generate_text(
     model_id: str,
     prompt: str,
-    max_new_tokens: int,
-    temperature: float,
-    top_p: float,
-    repetition_penalty: float
+    max_new_tokens: int
 ) -> str:
     """Generate text using a cloud-hosted TGI endpoint"""
     
@@ -115,10 +109,7 @@ async def generate_text(
                     "inputs": prompt,
                     "parameters": {
                         "max_new_tokens": max_new_tokens,
-                        "temperature": temperature,
-                        "top_p": top_p,
-                        "repetition_penalty": repetition_penalty,
-                        "do_sample": temperature > 0,
+                        "do_sample": False,
                     }
                 }
             )
@@ -234,10 +225,7 @@ async def generate(request: GenerateRequest):
     generated_text = await generate_text(
         request.model_id,
         request.prompt,
-        request.max_new_tokens,
-        request.temperature,
-        request.top_p,
-        request.repetition_penalty
+        request.max_new_tokens
     )
     
     return GenerateResponse(
