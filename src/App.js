@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import './App.css';
 
 // Backend API URL - Change this to your cloud backend IP/URL
-const API_URL = 'http://localhost:8000';  // TODO: Replace with your backend URL
+const API_URL = 'https://8000-01k4qrgrbasj2wn4er63c8sk4b.cloudspaces.litng.ai';  // TODO: Replace with your backend URL
 
 // Available models (will be fetched from backend)
 const DEFAULT_MODELS = [
@@ -23,6 +23,10 @@ function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [backendStatus, setBackendStatus] = useState('checking');
   const [error, setError] = useState(null);
+  
+  // Generation parameters
+  const [maxTokens, setMaxTokens] = useState(1024);
+  const [showSettings, setShowSettings] = useState(false);
 
   // Fetch available models from backend
   useEffect(() => {
@@ -71,9 +75,7 @@ function App() {
         body: JSON.stringify({
           model_id: modelId,
           prompt: userMessage,
-          max_new_tokens: 200,
-          temperature: 0.7,
-          top_p: 0.95,
+          max_new_tokens: maxTokens,
         }),
       });
 
@@ -136,6 +138,69 @@ function App() {
     }
   };
 
+  // Format message text with Lean code blocks only
+  const formatMessage = (text) => {
+    if (!text) return null;
+
+    // Only match Lean code blocks: ```lean or ```lean4
+    const parts = [];
+    let lastIndex = 0;
+    const leanCodeBlockRegex = /```(lean4?)\n([\s\S]*?)```/g;
+    let match;
+
+    while ((match = leanCodeBlockRegex.exec(text)) !== null) {
+      // Add text before code block (preserve as-is)
+      if (match.index > lastIndex) {
+        parts.push({
+          type: 'text',
+          content: text.substring(lastIndex, match.index)
+        });
+      }
+
+      // Add Lean code block
+      parts.push({
+        type: 'code',
+        language: match[1],
+        content: match[2].trim()
+      });
+
+      lastIndex = match.index + match[0].length;
+    }
+
+    // Add remaining text
+    if (lastIndex < text.length) {
+      parts.push({
+        type: 'text',
+        content: text.substring(lastIndex)
+      });
+    }
+
+    // If no Lean code blocks found, return original text
+    if (parts.length === 0) {
+      return <span style={{ whiteSpace: 'pre-wrap' }}>{text}</span>;
+    }
+
+    // Render parts
+    return (
+      <>
+        {parts.map((part, idx) => {
+          if (part.type === 'code') {
+            return (
+              <pre key={idx} className="code-block">
+                <div className="code-header">
+                  <span className="code-language">{part.language}</span>
+                </div>
+                <code>{part.content}</code>
+              </pre>
+            );
+          } else {
+            return <span key={idx} style={{ whiteSpace: 'pre-wrap' }}>{part.content}</span>;
+          }
+        })}
+      </>
+    );
+  };
+
   return (
     <div className="App">
       <header className="header">
@@ -180,7 +245,34 @@ function App() {
             ))}
           </select>
         </div>
+
+        <button 
+          className="settings-toggle"
+          onClick={() => setShowSettings(!showSettings)}
+          title="Generation Settings"
+        >
+          ⚙️
+        </button>
       </div>
+
+      {showSettings && (
+        <div className="settings-panel">
+          <div className="setting-item">
+            <label htmlFor="maxTokens">
+              Max Tokens: {maxTokens}
+            </label>
+            <input
+              type="range"
+              id="maxTokens"
+              min="128"
+              max="2048"
+              step="128"
+              value={maxTokens}
+              onChange={(e) => setMaxTokens(parseInt(e.target.value))}
+            />
+          </div>
+        </div>
+      )}
 
       {error && (
         <div className="error-banner">
@@ -208,7 +300,9 @@ function App() {
                       {models.find(m => m.id === model1)?.name || model1}
                     </div>
                     <div className="message-content assistant">
-                      {message.model1 || (
+                      {message.model1 ? (
+                        formatMessage(message.model1)
+                      ) : (
                         <span className="loading">Generating response...</span>
                       )}
                     </div>
@@ -219,7 +313,9 @@ function App() {
                       {models.find(m => m.id === model2)?.name || model2}
                     </div>
                     <div className="message-content assistant">
-                      {message.model2 || (
+                      {message.model2 ? (
+                        formatMessage(message.model2)
+                      ) : (
                         <span className="loading">Generating response...</span>
                       )}
                     </div>
